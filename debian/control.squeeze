@@ -1,0 +1,18 @@
+Source: pypoker-eval
+Section: libs
+Priority: optional
+Maintainer: Loic Dachary (OuoU) <loic@debian.org>
+Build-Depends: debhelper (>= 5.0.37.2), cdbs, python-central (>= 0.4.17), python-all-dev (>= 2.3.5-11), automake1.9, libtool, pkg-config, libpoker-eval-dev (>= 124.0)
+XS-Python-Version: >= 2.3
+Standards-Version: 3.8.1
+
+Package: python-pypoker-eval
+Section: python
+Architecture: any
+Depends: ${shlibs:Depends}, ${python:Depends}, ${misc:Depends}
+XB-Python-Version: ${python:Versions}
+Provides: ${python:Provides}
+Conflicts: python2.3-pypoker-eval (<< 132.0), python2.4-pypoker-eval (<< 132.0)
+Description: python interface to poker hand evaluator library development files
+ This package is a free (GPL) toolkit for writing programs which
+ simulate or analyze poker games.

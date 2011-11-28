@@ -1,0 +1,260 @@
+2009-08-12  Loic Dachary <loic@dachary.org>
+
+	* Release 138.0
+
+2009-07-09  Loic Dachary <loic@dachary.org>
+
+	* Release 137.0
+
+	* debian/rules: remove .la from distribution because it's not
+	  needed for python plugins
+	* debian/copyright: upgrade copyright notice to GPLv3
+	* debian/control: upgrade section to python, upgrade policy, add
+	  misc:Depends
+
+2009-06-09  Loic Dachary <loic@dachary.org>
+
+	* pokereval.py: improved documentation for the "best" method
+	  (courtesy tsr_)
+
+2008-12-27  Loic Dachary <loic@dachary.org>
+
+	* ChangeLog, NEWS, configure.ac, debian/changelog: bump to version
+	  137
+
+2008-12-26  Loic Dachary <loic@dachary.org>
+
+	* Release 136.0
+
+	* debian/control.edgy, debian/control.etch, debian/control.feisty,
+	  debian/control.gutsy: add g++ dependency for backport to obey the
+	  r5119 bkuhn AC_PROG_CXX addition
+	* ChangeLog, NEWS, debian/changelog: version bump to 136
+
+2008-12-25  Loic Dachary <loic@dachary.org>
+
+	* debian/copyright: license upgrade to GPLv3+
+	* COPYING, bug-1823.py, config/ccpython.m4, configure.ac,
+	  pokereval.py, pypokereval.c, test.py: license upgrade to GPLv3+
+
+2008-12-02  Bradley M. Kuhn  <bkuhn@ebb.org>
+
+	* configure.ac (AC_PROG_CPP): AC_PROG_CPP appears to be
+	deprecated; switched to AC_PROG_CXX
+
+2008-11-30  Bradley M. Kuhn  <bkuhn@ebb.org>
+
+	* config/python.m4 (AM_PATH_PYTHON): Added python2.6 support.
+
+	* config/ccpython.m4 (ALL_CC_PYTHON): Added python2.6 support.
+
+2008-03-01  Loic Dachary <loic@dachary.org>
+
+	* Release 135.0
+
+	* Makefile.am, configure.ac: osx compilation fixes
+
+2007-12-02  Loic Dachary <loic@dachary.org>
+
+	* AUTHORS, Makefile.am, README, config/ccpython.m4, configure.ac,
+	  debian/copyright, pokereval.py, pypokereval.c, test.py: update
+	  copyrights
+	* Makefile.am: https://gna.org/support/index.php?1823 test case
+	* bug-1823.py: test that the comparison operator change of
+	  INNER_LOOP macro did not introduce an obvious problem
+	* pypokereval.c: compare double with > instead of ==
+
+2007-07-24  Loic Dachary <loic@dachary.org>
+
+	* config/ccpython.m4: cygwin hack is no longer necessary: it does
+	  not work anyways
+
+2007-06-15  Loic Dachary <loic@dachary.org>
+
+	* debian/control.gutsy, debian/control.lenny: lenny and gutsy
+	  support
+
+2007-05-16  Loic Dachary <loic@dachary.org>
+
+	* ChangeLog, NEWS, debian/changelog: Version bump.
+
+2007-02-14  Loic Dachary <loic@dachary.org>
+
+	* debian/control.feisty: feisty support
+
+2007-02-13  Loic Dachary <loic@dachary.org>
+
+	* config/ccpython.m4: detect 25 & unset cache
+
+2007-02-12  Loic Dachary <loic@dachary.org>
+
+	* debian/changelog: upstream sync
+	* debian/changelog: edgy fix
+	* debian/control.edgy: edgy needs pycentral for python2.5
+
+2006-11-20  cpinson
+
+	* gentoo/dev-games/pypoker-eval/pypoker-eval-132.0-r1.ebuild: down
+	* trunk/poker-eval/gentoo/dev-games/poker-eval/poker-eval-133.0-r1.ebuild,
+	  gentoo/dev-games/pypoker-eval/pypoker-eval-133.0-r1.ebuild: up
+
+2006-11-15  Loic Dachary <loic@dachary.org>
+
+	* debian/control, debian/control.breezy, debian/control.dapper,
+	  debian/control.edgy, debian/control.etch, debian/control.hoary,
+	  debian/control.sarge, debian/control.unstable: poker2.4 conflicts
+
+2006-10-29  Loic Dachary  <loic@dachary.org>
+
+	* Release 134.0
+
+2006-10-01  Cedric Pinson  <cpinson@freesheep.org>
+
+	* Release 133.0
+
+	* Update gentoo package
+
+2006-09-12  Loic Dachary  <loic@dachary.org>
+
+	* debian/changelog: edgy & etch control files
+
+	* debian/control.edgy, debian/control.etch: edgy & etch
+
+2006-07-19  Loic Dachary  <loic@dachary.org>
+
+	* Release 132.0
+
+	* test.py: Look for modules in .libs.
+
+	* pypokereval.c: Module name compilation depend.
+
+	* pypoker-eval.pc.in:
+	Path have to be retrieved from python directly instead of from the .pc
+
+	* pokereval.py: Binary module import depends on python version.
+
+	* debian/control: Obsolete versioned packages
+
+	* debian/compat: *** empty log message ***
+
+	* debian/changelog: 132
+
+	* debian/rules: Depend on pycentral instead of custom made rules
+
+	* configure.ac: Look for all installed python versions.
+
+	* config/python.m4, config/ccpython.m4:
+	Generate versioned variables for every python development environment available.
+
+	* README: more explicit title
+
+	* NEWS: 132
+
+	* Makefile.am:
+	The module is compiled for every available python development environment. No need for post install tweaks.
+
+2006-07-19  Loic Dachary  <loic@dachary.org>
+
+	* configure.ac: compile for 2.5, 2.4 and 2.3 python versions, rename all
+	  shared libs.
+
+Fri Jun 09 2006  Cedric Pinson  <cpinson@freesheep.org>
+
+	* Release 131.0
+
+	* gentoo/dev-games/pypoker-eval/pypoker-eval-131.0-r1.ebuild:
+	Update gentoo package
+
+Sat Apr 15 2006  Loic Dachary  <loic@gnu.org>
+
+	* configure.ac: get rid of bootstrap + autotools tweaks
+
+Wed Mar 29 2006  Loic Dachary  <loic@gnu.org>
+
+	* Makefile.am (EXTRA_DIST): gentoo files
+
+Mon Mar 13 2006  Loic Dachary  <loic@gnu.org>
+
+	* pypokereval.c: kill compilation warnings
+
+Fri Mar 10 2006  Loic Dachary  <loic@gnu.org>
+
+	* Release 130.0
+
+	* python2.2 support for redhat9 (https://sourceforge.net/tracker/index.php?func=detail&aid=1428078&group_id=13546&atid=213546)
+
+Mon Jan 16 2006  Loic Dachary  <loic@gnu.org>
+
+	* Release 129.0
+
+	* cygwin portability fixes
+
+Thu Sep 22 2005  Loic Dachary  <loic@gnu.org>
+
+	* Release 128.0
+
+	* Makefile.am (pkgconfig_DATA): pypoker-eval.pc
+
+Wed Sep 21 2005  Loic Dachary  <loic@gnu.org>
+
+	* bootstrap: upgrade
+	
+	* configure.ac: strict selection of python interpreter is allowed
+	
+	* config/ccpython.m4: rebuild from scratch
+	
+	* config/python.m4: fix bugous header detection
+
+Wed Apr 27 17:47:45 2005  Loic Dachary  <loic@gnu.org>
+
+	* Release 127.0
+
+	* pypokereval.c: use COMBINATIONS instead of PERMUTATIONS when
+	  enumerating unknown cards.
+
+Fri Dec 10 11:49:26 2004  Loic Dachary  <loic@gnu.org>
+
+	* Release 126.0
+
+	* pokereval.py (winners): fill_pockets is set => fill_pockets is not set. iteration
+	  is infinite by default, not 1.
+
+Thu Dec 09 18:20:59 2004  Loic Dachary  <loic@gnu.org>
+
+	* pypokereval.c (CardMask2PyList): must not use implicit StdDeck_maskToCard. Use CurDeck instead.
+
+	* configure.ac: add warnings
+
+Mon Dec 06 18:40:29 2004  Loic Dachary  <loic@gnu.org>
+
+	* Release 125.0
+
+	* RPM packages from Jean-Christophe Duberga <jeanchristophe.duber@free.fr>
+
+Tue Oct 19 16:35:49 2004  Loic Dachary  <loic@gnu.org>
+
+	* Release 122.0
+
+	* Documentation
+
+Sun Sep 19 13:14:34 2004  Loic Dachary  <loic@gnu.org>
+
+  	* pypokereval.c (eval_hand): wrongly picked 3 cards from hole
+	  cards in omaha8. Reworked the function.
+	
+	  https://gna.org/bugs/index.php?func=detailitem&item_id=735
+	
+	* pypokereval.c (CardMask2SortedPyList): add missing STFLUSH case.
+	  https://gna.org/bugs/index.php?func=detailitem&item_id=735
+	
+Fri Jul 23 17:18:16 2004  Loic Dachary  <loic@gnu.org>
+
+	* pypokereval.c: Py_DECREF where appropriate
+
+Sat Feb 21 12:56:11 2004  Loic Dachary  <loic@gnu.org>
+
+	* Initial revision
+
+Local Variables:
+compile-command: "svn update ; svn2cl --group-by-day --authors=$(echo $HOME)/.svn2cl --stdout | head -2000 | sed -n '0,/^2008-11-01/p'"
+End:

@@ -1,0 +1,9 @@
+# pkg-config source file
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+Name: pypoker-eval
+Description: python adaptor for the poker-eval toolkit
+Version: @PACKAGE_VERSION@
+Conflicts:

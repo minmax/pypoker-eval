@@ -1,0 +1,60 @@
+* Release 138.0 
+
+Bug fixes.
+
+* Release 137.0 
+
+Debian packaging upgrades.
+Slight improvement in the documentation.
+
+* Release 136.0 
+
+GPLv3+ license upgrade
+
+* Release 135.0 
+
+Minor bug fixes.
+
+* Release 134.0 
+
+Bug fixes.
+
+* Release 133.0 
+
+Portability fixes.
+
+* Release 132.0 
+
+Major repackaging (support multiple python version in a single package).
+
+* Release 131.0 
+
+Minor compilation fixes.
+
+* Release 130.0 
+
+Portability fixes (python2.2, redhat).
+
+* Release 129.0 
+
+Portability fixes.
+
+* Release 128.0 
+
+Rework build system and packages for distribution on python2.3 and python2.4
+
+Portability fixes.
+
+* Release 126.0 
+
+Bug fixes.
+
+* Release 125.0 
+
+RPM packages
+
+* Release 122.0 
+
+Documentation
+
+* Release 121.0 

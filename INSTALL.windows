@@ -1,0 +1,13 @@
+pypoker-eval on Windows
+
+1. install python
+
+2. open visual studio project and change directories to include python directories and fix the path to the poker-eval project
+
+3. build the project, there may be an undefined ssize you can typedef as int
+
+4. locate the newly built dll pypokereval.dll then look at the exports and you will find something similar to init_pokereval_2_4
+
+5. rename the dll to _pokereval_2_4.pyd (your version numbers) and move it into the test.py directory
+
+6. edit the .py files so the imported module is _pokereval_2_4 (your version numbers) not a dynamically generated one

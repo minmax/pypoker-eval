@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pythonpoker-eval", "pypoker-eval.vcproj", "{BCBF81C6-64CF-4826-BD58-6879D92295FB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A4DEF05E-E072-493E-B282-84731D60BCF0} = {A4DEF05E-E072-493E-B282-84731D60BCF0}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "poker-eval", "..\poker-eval\poker-eval.vcproj", "{A4DEF05E-E072-493E-B282-84731D60BCF0}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		profile = profile
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{BCBF81C6-64CF-4826-BD58-6879D92295FB}.Debug.ActiveCfg = Debug|Win32
+		{BCBF81C6-64CF-4826-BD58-6879D92295FB}.Debug.Build.0 = Debug|Win32
+		{BCBF81C6-64CF-4826-BD58-6879D92295FB}.profile.ActiveCfg = Release|Win32
+		{BCBF81C6-64CF-4826-BD58-6879D92295FB}.profile.Build.0 = Release|Win32
+		{BCBF81C6-64CF-4826-BD58-6879D92295FB}.Release.ActiveCfg = Release|Win32
+		{BCBF81C6-64CF-4826-BD58-6879D92295FB}.Release.Build.0 = Release|Win32
+		{A4DEF05E-E072-493E-B282-84731D60BCF0}.Debug.ActiveCfg = Debug|Win32
+		{A4DEF05E-E072-493E-B282-84731D60BCF0}.Debug.Build.0 = Debug|Win32
+		{A4DEF05E-E072-493E-B282-84731D60BCF0}.profile.ActiveCfg = profile|Win32
+		{A4DEF05E-E072-493E-B282-84731D60BCF0}.profile.Build.0 = profile|Win32
+		{A4DEF05E-E072-493E-B282-84731D60BCF0}.Release.ActiveCfg = Release|Win32
+		{A4DEF05E-E072-493E-B282-84731D60BCF0}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

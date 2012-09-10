@@ -65,388 +65,47 @@
 #define PYTHON_VERSION "2_4"
 #endif /* WIN32 */
 
-/* INNER_LOOP is executed in every iteration of the combinatorial enumerator
-   macros DECK_ENUMERATE_n_CARDS_D() and DECK_ENUMERATE_PERMUTATIONS_D.  It
-   evaluates each player's hand based on the enumerated community cards and
-   accumulates statistics on wins, ties, losses, and pot equity.
-
-   Macro argument:
-   	evalwrap -- code that evaluates pockets[i], board, sharedCards, and/or
-        	    unsharedCards[i] as a poker hand, then stores the result
-                    in hival[i] and loval[i] and stores an error code in err
-   Loop variable: either of
-   	StdDeck_CardMask sharedCards;
-   	StdDeck_CardMask unsharedCards[];
-   Inputs:
-   	StdDeck_CardMask pockets[];
-        StdDeck_CardMask board;
-        int npockets;
-   Outputs:
-   	enum_result_t *result;
-*/
-
-#define INNER_LOOP(evalwrap)						\
-    do {								\
-      int i;								\
-      HandVal hival[ENUM_MAXPLAYERS];					\
-      LowHandVal loval[ENUM_MAXPLAYERS];				\
-      HandVal besthi = HandVal_NOTHING;					\
-      LowHandVal bestlo = LowHandVal_NOTHING;				\
-      int hishare = 0;							\
-      int loshare = 0;							\
-      double hipot, lopot;						\
-      /* find winning hands for high and low */				\
-      for (i=0; i<sizeToDeal-1; i++) {					\
-	int err;							\
-        { evalwrap }							\
-        if (err != 0)							\
-          return 1000 + err;						\
-        if (hival[i] != HandVal_NOTHING) {				\
-          if (hival[i] > besthi) {					\
-            besthi = hival[i];						\
-            hishare = 1;						\
-          } else if (hival[i] == besthi) {				\
-            hishare++;							\
-          }								\
-        }								\
-        if (loval[i] != LowHandVal_NOTHING) {				\
-          if (loval[i] < bestlo) {					\
-            bestlo = loval[i];						\
-            loshare = 1;						\
-          } else if (loval[i] == bestlo) {				\
-            loshare++;							\
-          }								\
-        }								\
-      }									\
-      /* now award pot fractions to winning hands */			\
-      if (bestlo != LowHandVal_NOTHING &&				\
-          besthi != HandVal_NOTHING) {					\
-        hipot = 0.5 / hishare;						\
-        lopot = 0.5 / loshare;						\
-      } else if (bestlo == LowHandVal_NOTHING &&			\
-                 besthi != HandVal_NOTHING) {				\
-        hipot = 1.0 / hishare;						\
-        lopot = 0;							\
-      } else if (bestlo != LowHandVal_NOTHING &&			\
-                 besthi == HandVal_NOTHING) {				\
-        hipot = 0;							\
-        lopot = 1.0 / loshare;						\
-      } else {								\
-        hipot = lopot = 0;						\
-      }									\
-      for (i=0; i<sizeToDeal-1; i++) {					\
-        double potfrac = 0;						\
-        int H = 0, L = 0;						\
-        if (hival[i] != HandVal_NOTHING) {				\
-          if (hival[i] == besthi) {					\
-            H = hishare;						\
-            potfrac += hipot;						\
-            if (hishare == 1)						\
-              result->nwinhi[i]++;					\
-             else							\
-              result->ntiehi[i]++;					\
-          } else {							\
-            result->nlosehi[i]++;					\
-          }								\
-        }								\
-        if (loval[i] != LowHandVal_NOTHING) {				\
-          if (loval[i] == bestlo) {					\
-            L = loshare;						\
-            potfrac += lopot;						\
-            if (loshare == 1)						\
-              result->nwinlo[i]++;					\
-            else							\
-              result->ntielo[i]++;					\
-          } else {							\
-            result->nloselo[i]++;					\
-          }								\
-        }								\
-        result->nsharehi[i][H]++;					\
-        result->nsharelo[i][L]++;					\
-        result->nshare[i][H][L]++;					\
-        if (potfrac > 0.99)						\
-          result->nscoop[i]++;						\
-        result->ev[i] += potfrac;					\
-      }									\
-      result->nsamples++;						\
-    } while (0);
-
-#define INNER_LOOP_ANY_HIGH						\
-  INNER_LOOP({								\
-    StdDeck_CardMask _hand;						\
-    StdDeck_CardMask _finalBoard;					\
-    StdDeck_CardMask_RESET(_hand);					\
-    StdDeck_CardMask_RESET(_finalBoard);				\
-    StdDeck_CardMask_OR(_finalBoard, board, cardsDealt[0]);		\
-    StdDeck_CardMask_OR(_hand, pockets[i], _finalBoard);		\
-    StdDeck_CardMask_OR(_hand, _hand, cardsDealt[i + 1]);		\
-    hival[i] = StdDeck_StdRules_EVAL_N(_hand, 7);			\
-    loval[i] = LowHandVal_NOTHING;					\
-    err = 0;								\
-  })
-
-#define INNER_LOOP_ANY_HILO						\
-  INNER_LOOP({								\
-    StdDeck_CardMask _hand;						\
-    StdDeck_CardMask _finalBoard;					\
-    StdDeck_CardMask_RESET(_hand);					\
-    StdDeck_CardMask_RESET(_finalBoard);				\
-    StdDeck_CardMask_OR(_finalBoard, board, cardsDealt[0]);		\
-    StdDeck_CardMask_OR(_hand, pockets[i], _finalBoard);		\
-    StdDeck_CardMask_OR(_hand, _hand, cardsDealt[i + 1]);		\
-    hival[i] = StdDeck_StdRules_EVAL_N(_hand, 7);			\
-    loval[i] = StdDeck_Lowball8_EVAL(_hand, 7);				\
-    err = 0;								\
-  })
-
-#define INNER_LOOP_OMAHA						\
-  INNER_LOOP({								\
-    StdDeck_CardMask _hand;						\
-    StdDeck_CardMask _finalBoard;					\
-    StdDeck_CardMask_RESET(_hand);					\
-    StdDeck_CardMask_RESET(_finalBoard);				\
-    StdDeck_CardMask_OR(_finalBoard, board, cardsDealt[0]);		\
-    StdDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);		\
-    err = StdDeck_OmahaHiLow8_EVAL(_hand, _finalBoard,                  \
-                                   &hival[i], NULL);			\
-    loval[i] = LowHandVal_NOTHING;					\
-  })
-
-#define INNER_LOOP_OMAHA8						\
-  INNER_LOOP({								\
-    StdDeck_CardMask _hand;						\
-    StdDeck_CardMask _finalBoard;					\
-    StdDeck_CardMask_RESET(_hand);					\
-    StdDeck_CardMask_RESET(_finalBoard);				\
-    StdDeck_CardMask_OR(_finalBoard, board, cardsDealt[0]);		\
-    StdDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);		\
-    err = StdDeck_OmahaHiLow8_EVAL(_hand, _finalBoard,                  \
-                                   &hival[i], &loval[i]);		\
-  })
-
-#define INNER_LOOP_7STUDNSQ						\
-  INNER_LOOP({								\
-    StdDeck_CardMask _hand;						\
-    StdDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);		\
-    hival[i] = StdDeck_StdRules_EVAL_N(_hand, 7);			\
-    loval[i] = StdDeck_Lowball_EVAL(_hand, 7);				\
-    err = 0;								\
-  })
-
-#define INNER_LOOP_RAZZ							\
-  INNER_LOOP({								\
-    StdDeck_CardMask _hand;						\
-    StdDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);		\
-    hival[i] = HandVal_NOTHING;						\
-    loval[i] = StdDeck_Lowball_EVAL(_hand, 7);				\
-    err = 0;								\
-  })
-
-#define INNER_LOOP_5DRAW						\
-  INNER_LOOP({								\
-    JokerDeck_CardMask _hand;						\
-    JokerDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);	\
-    hival[i] = JokerDeck_JokerRules_EVAL_N(_hand, 5);			\
-    loval[i] = LowHandVal_NOTHING;					\
-    err = 0;								\
-  })
-
-#define INNER_LOOP_5DRAW8						\
-  INNER_LOOP({								\
-    JokerDeck_CardMask _hand;						\
-    JokerDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);	\
-    hival[i] = JokerDeck_JokerRules_EVAL_N(_hand, 5);			\
-    loval[i] = JokerDeck_Lowball8_EVAL(_hand, 5);			\
-    err = 0;								\
-  })
-
-#define INNER_LOOP_5DRAWNSQ						\
-  INNER_LOOP({								\
-    JokerDeck_CardMask _hand;						\
-    JokerDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);	\
-    hival[i] = JokerDeck_JokerRules_EVAL_N(_hand, 5);			\
-    loval[i] = JokerDeck_Lowball_EVAL(_hand, 5);			\
-    err = 0;								\
-  })
-
-#define INNER_LOOP_LOWBALL						\
-  INNER_LOOP({								\
-    JokerDeck_CardMask _hand;						\
-    JokerDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);	\
-    hival[i] = HandVal_NOTHING;						\
-    loval[i] = JokerDeck_Lowball_EVAL(_hand, 5);			\
-    err = 0;								\
-  })
-
-#define INNER_LOOP_LOWBALL27						\
-  INNER_LOOP({								\
-    StdDeck_CardMask _hand;						\
-    StdDeck_CardMask_OR(_hand, pockets[i], cardsDealt[i + 1]);		\
-    hival[i] = HandVal_NOTHING;						\
-    loval[i] = StdDeck_StdRules_EVAL_N(_hand, 5);			\
-    err = 0;								\
-  })
-
-static int 
-pyenumExhaustive(enum_game_t game, StdDeck_CardMask pockets[],
-		 int numToDeal[],
-               StdDeck_CardMask board, StdDeck_CardMask dead,
-               int sizeToDeal, enum_result_t *result) {
-  int totalToDeal = 0;
-  int i;
-  enumResultClear(result);
-  StdDeck_CardMask cardsDealt[ENUM_MAXPLAYERS + 1];
-  memset(cardsDealt, 0, sizeof(StdDeck_CardMask) * (ENUM_MAXPLAYERS + 1));
-  if (sizeToDeal - 1 > ENUM_MAXPLAYERS)
-    return 1;
-  for(i = 0; i < sizeToDeal; i++)
-    totalToDeal += numToDeal[i];
-
-  /*
-   * Cards in pockets or in the board must not be dealt 
-   */
-  StdDeck_CardMask_OR(dead, dead, board);
-  for(i = 0; i < sizeToDeal - 1; i++) {
-    StdDeck_CardMask_OR(dead, dead, pockets[i]);
-  }
-
-  if (game == game_holdem) {
-    if(totalToDeal > 0) {
-      DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-				    sizeToDeal, numToDeal,
-				    dead, INNER_LOOP_ANY_HIGH);
-    } else {
-      INNER_LOOP_ANY_HIGH;
-    }
-  } else if (game == game_holdem8) {
-    if(totalToDeal > 0) {
-      DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-				    sizeToDeal, numToDeal,
-				    dead, INNER_LOOP_ANY_HILO);
-    } else {
-      INNER_LOOP_ANY_HILO;
-    }
-  } else if (game == game_omaha) {
-    if(totalToDeal > 0) {
-      DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-				    sizeToDeal, numToDeal,
-				    dead, INNER_LOOP_OMAHA);
-    } else {
-      INNER_LOOP_OMAHA;
-    }
-  } else if (game == game_omaha8) {
-    if(totalToDeal > 0) {
-      DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-				    sizeToDeal, numToDeal,
-				    dead, INNER_LOOP_OMAHA8);
-    } else {
-      INNER_LOOP_OMAHA8;
-    }
-  } else if (game == game_7stud) {
-    if(totalToDeal > 0) {
-      DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-				    sizeToDeal, numToDeal,
-				    dead, INNER_LOOP_ANY_HIGH);
-    } else {
-      INNER_LOOP_ANY_HIGH;
-    }
-  } else if (game == game_7stud8) {
-    if(totalToDeal > 0) {
-      DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-				    sizeToDeal, numToDeal,
-				    dead, INNER_LOOP_ANY_HILO);
-    } else {
-      INNER_LOOP_ANY_HILO;
-    }
-  } else if (game == game_7studnsq) {
-    DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-                                  sizeToDeal, numToDeal,
-                                  dead, INNER_LOOP_7STUDNSQ);
-  } else if (game == game_razz) {
-    DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-                                  sizeToDeal, numToDeal,
-                                  dead, INNER_LOOP_RAZZ);
-  } else if (game == game_lowball27) {
-    DECK_ENUMERATE_COMBINATIONS_D(StdDeck, cardsDealt,
-                                  sizeToDeal, numToDeal,
-                                  dead, INNER_LOOP_LOWBALL27);
-  } else {
-    return 1;
-  }
-
-  result->game = game;
-  result->nplayers = sizeToDeal - 1;
-  result->sampleType = ENUM_EXHAUSTIVE;
-  return 0;  
-}
-
-static int 
-pyenumSample(enum_game_t game, StdDeck_CardMask pockets[],
-		 int numToDeal[],
-               StdDeck_CardMask board, StdDeck_CardMask dead,
-               int sizeToDeal, int iterations, enum_result_t *result) {
-  int i;
-  enumResultClear(result);
-  StdDeck_CardMask cardsDealt[ENUM_MAXPLAYERS + 1];
-  memset(cardsDealt, 0, sizeof(StdDeck_CardMask) * (ENUM_MAXPLAYERS + 1));
-  if (sizeToDeal - 1 > ENUM_MAXPLAYERS)
-    return 1;
-
-  /*
-   * Cards in pockets or in the board must not be dealt 
-   */
-  StdDeck_CardMask_OR(dead, dead, board);
-  for(i = 0; i < sizeToDeal - 1; i++) {
-    StdDeck_CardMask_OR(dead, dead, pockets[i]);
-  }
-
-  if (game == game_holdem) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_ANY_HIGH);
-  } else if (game == game_holdem8) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_ANY_HILO);
-  } else if (game == game_omaha) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_OMAHA);
-  } else if (game == game_omaha8) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_OMAHA8);
-  } else if (game == game_7stud) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_ANY_HIGH);
-  } else if (game == game_7stud8) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_ANY_HILO);
-  } else if (game == game_7studnsq) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_7STUDNSQ);
-  } else if (game == game_razz) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_RAZZ);
-  } else if (game == game_lowball27) {
-    DECK_MONTECARLO_PERMUTATIONS_D(StdDeck, cardsDealt,
-				   sizeToDeal, numToDeal,
-				   dead, iterations, INNER_LOOP_LOWBALL27);
-  } else {
-    return 1;
-  }
-
-  result->game = game;
-  result->nplayers = sizeToDeal - 1;
-  result->sampleType = ENUM_SAMPLE;
-  return 0;  
-}
-
 #define NOCARD 255
+
+int
+pyenumExhaustive(enum_game_t game, StdDeck_CardMask pockets[],
+               StdDeck_CardMask board, StdDeck_CardMask dead,
+               int npockets, int nboard, int orderflag,
+               enum_result_t *result)
+{
+    int i;
+    
+    /*
+     * Cards in pokets and baord must not be dealt
+     */
+    StdDeck_CardMask_OR(dead, dead, board);
+    for (i = 0; i < npockets; i++)
+    {
+        StdDeck_CardMask_OR(dead, dead, pockets[i]);
+    }
+    
+    return enumExhaustive(game, pockets, board, dead, npockets, nboard, orderflag, result);
+}
+
+int
+pyenumSample(enum_game_t game, StdDeck_CardMask pockets[],
+             StdDeck_CardMask board, StdDeck_CardMask dead,
+             int npockets, int nboard, int niter, int orderflag,
+             enum_result_t *result)
+{
+    int i;
+    
+    /*
+     * Cards in pokets and board must not be dealt
+     */
+    StdDeck_CardMask_OR(dead, dead, board);
+    for (i = 0; i < npockets; i++)
+    {
+        StdDeck_CardMask_OR(dead, dead, pockets[i]);
+    }
+    
+    return enumSample(game, pockets, board, dead, npockets, nboard, niter, orderflag, result);
+}
 
 static int PyList2CardMask(PyObject* object, CardMask* cardsp)
 {
@@ -936,6 +595,7 @@ poker_eval(PyObject* self, PyObject *args, PyObject *keywds)
 {
   int i;
   int pockets_size;
+  int nboard = 0;
   int fill_pockets = 0;
   int iterations = 0;
   PyObject* pypockets = 0;
@@ -945,7 +605,6 @@ poker_eval(PyObject* self, PyObject *args, PyObject *keywds)
   enum_gameparams_t* params = 0;
 
   StdDeck_CardMask pockets[ENUM_MAXPLAYERS];
-  int numToDeal[ENUM_MAXPLAYERS];
   CardMask dead_cards;
   CardMask board_cards;
 
@@ -1006,22 +665,13 @@ poker_eval(PyObject* self, PyObject *args, PyObject *keywds)
       count = PyList2CardMask(pypocket, &pockets[i]);
       if(count < 0)
 	goto err;
-      if(count < PyList_Size(pypocket))
-	numToDeal[i + 1] = PyList_Size(pypocket) - count;
-      else
-	numToDeal[i + 1] = 0;
     }
   }
 
   {
-    int count;
-    count = PyList2CardMask(pyboard, &board_cards);
-    if(count < 0)
+    nboard = PyList2CardMask(pyboard, &board_cards);
+    if(nboard < 0)
       goto err;
-    if(count < PyList_Size(pyboard))
-      numToDeal[0] = PyList_Size(pyboard) - count;
-    else
-      numToDeal[0] = 0;
   }
 
   if(pydead) {
@@ -1037,9 +687,9 @@ poker_eval(PyObject* self, PyObject *args, PyObject *keywds)
     memset(&cresult, '\0', sizeof(enum_result_t));
 
     if(iterations > 0) {
-      err = pyenumSample(params->game, pockets, numToDeal, board_cards, dead_cards, pockets_size + 1, iterations, &cresult);
+      err = pyenumSample(params->game, pockets, board_cards, dead_cards, pockets_size, nboard, iterations, 0, &cresult);
     } else {
-      err = pyenumExhaustive(params->game, pockets, numToDeal, board_cards, dead_cards, pockets_size + 1, &cresult);
+      err = pyenumExhaustive(params->game, pockets, board_cards, dead_cards, pockets_size, nboard, 0, &cresult);
     }
     if(err != 0) {
       PyErr_Format(PyExc_RuntimeError, "poker-eval: pyenum returned error code %d", err);

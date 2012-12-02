@@ -33,7 +33,7 @@ core.setup(
         Extension(
             C_NAME,
             ['pypokereval.c'],
-            include_dirs = ['include', '/usr/include/poker-eval'],
+            include_dirs = ['include', '/usr/local/include/poker-eval'],
             libraries = ['poker-eval'],
             define_macros = [
                 ('PYTHON_VERSION', '"%s"' % PYTHON_VERSION),

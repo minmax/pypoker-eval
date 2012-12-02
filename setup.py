@@ -21,7 +21,7 @@ C_NAME = '_pokereval_' + PYTHON_VERSION
 
 core.setup(
     name = 'pokereval',
-    version = '1.38',
+    version = '1.39',
     description = '',
     author = '',
     author_email = '',

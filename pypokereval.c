@@ -74,16 +74,16 @@ pyenumExhaustive(enum_game_t game, StdDeck_CardMask pockets[],
                enum_result_t *result)
 {
     int i;
-    
+
     /*
-     * Cards in pokets and baord must not be dealt
+     * Cards in pockets and board must not be dealt
      */
     StdDeck_CardMask_OR(dead, dead, board);
     for (i = 0; i < npockets; i++)
     {
         StdDeck_CardMask_OR(dead, dead, pockets[i]);
     }
-    
+
     return enumExhaustive(game, pockets, board, dead, npockets, nboard, orderflag, result);
 }
 
@@ -94,16 +94,16 @@ pyenumSample(enum_game_t game, StdDeck_CardMask pockets[],
              enum_result_t *result)
 {
     int i;
-    
+
     /*
-     * Cards in pokets and board must not be dealt
+     * Cards in pockets and board must not be dealt
      */
     StdDeck_CardMask_OR(dead, dead, board);
     for (i = 0; i < npockets; i++)
     {
         StdDeck_CardMask_OR(dead, dead, pockets[i]);
     }
-    
+
     return enumSample(game, pockets, board, dead, npockets, nboard, niter, orderflag, result);
 }
 
@@ -290,7 +290,7 @@ CardMask2SortedPyList(CardMask hand, int low)
     Py_DECREF(pyvalue);
     return result;
   }
-  
+
   if(low) {
     handval = Hand_EVAL_LOW8(hand, 5);
   } else {
@@ -354,7 +354,7 @@ CardMask2SortedPyList(CardMask hand, int low)
 	PyList_Append(result, pyvalue);
 	Py_DECREF(pyvalue);
       }
-    }    
+    }
 
     if (StdRules_nSigCards[htype] >= 3) {
       int rank = HandVal_THIRD_CARD(handval);
@@ -489,7 +489,7 @@ OmahaHiLow8_Best(StdDeck_CardMask hole, StdDeck_CardMask board,
   return 0;
 }
 
-static char doc_eval_hand[] = 
+static char doc_eval_hand[] =
 "return the evaluation of the hand, either low or hi. Result is a list, first element hand value, second element the best 5 card hand as a list of card values.";
 
 static PyObject*
@@ -509,7 +509,7 @@ eval_hand(PyObject* self, PyObject *args)
   StdDeck_CardMask_RESET(best);
 
   if (!PyArg_ParseTuple(args, "sOO", &hilow_string, &pyhand, &pyboard))
-    return NULL; 
+    return NULL;
 
   if(!strcmp(hilow_string, "low"))
     low = 1;
@@ -551,7 +551,7 @@ eval_hand(PyObject* self, PyObject *args)
       best_handval = HandVal_NOTHING;
     }
 
-    ENUMERATE_N_CARDS_D(cards, 5, dead, 
+    ENUMERATE_N_CARDS_D(cards, 5, dead,
     {
       HandVal handval;
 
@@ -587,7 +587,7 @@ eval_hand(PyObject* self, PyObject *args)
   return result;
 }
 
-static char doc_poker_eval[] = 
+static char doc_poker_eval[] =
 "eval a poker game state";
 
 static PyObject*
@@ -612,9 +612,9 @@ poker_eval(PyObject* self, PyObject *args, PyObject *keywds)
 
   static char *kwlist[] = {"game", "pockets", "board", "dead", "fill_pockets", "iterations", NULL};
 
-  if (!PyArg_ParseTupleAndKeywords(args, keywds, "sOO|Oii", kwlist, 
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "sOO|Oii", kwlist,
 				   &game, &pypockets, &pyboard, &pydead, &fill_pockets, &iterations))
-    return NULL; 
+    return NULL;
 
   if(!strcmp(game, "holdem")) {
     params = enumGameParams(game_holdem);
@@ -659,7 +659,7 @@ poker_eval(PyObject* self, PyObject *args, PyObject *keywds)
       int count;
       CardMask_RESET(pockets[i]);
       PyObject* pypocket = PyList_GetItem(pypockets, i);
-      if(PyErr_Occurred()) 
+      if(PyErr_Occurred())
 	goto err;
 
       count = PyList2CardMask(pypocket, &pockets[i]);

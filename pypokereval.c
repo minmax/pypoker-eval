@@ -34,7 +34,26 @@
 #else
  #include <Python.h>
 #endif
+#include <bytesobject.h>
 
+#if PY_MAJOR_VERSION >= 3
+ #define IS_PY3K
+#endif
+
+struct module_state {
+	PyObject *error;
+};
+
+#ifdef IS_PY3K
+ #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+ #define PyInteger_Check PyLong_Check
+ #define PyInteger_AsLong PyLong_AsLong
+#else
+ #define GETSTATE(m) (&_state)
+ static struct module_state _state;
+ #define PyInteger_Check PyInt_Check
+ #define PyInteger_AsLong PyInt_AsLong
+#endif
 
 /* enumerate.c -- functions to compute pot equity by enumerating outcomes
   Exports:
@@ -469,9 +488,17 @@ static int PyList2CardMask(PyObject* object, CardMask* cardsp)
     PyObject* pycard = PyList_GetItem(object, i);
     if(PyErr_Occurred())
       return -1;
-
+#ifdef IS_PY3K
+    if(PyUnicode_Check(pycard)) {
+      PyObject * temp_bytes = PyUnicode_AsEncodedString(pycard, "ASCII", "strict");
+      if (temp_bytes == NULL) return -2;
+      char* card_string = PyBytes_AS_STRING(temp_bytes);
+      card_string = strdup(card_string);
+      Py_DECREF(temp_bytes);
+#else
     if(PyString_Check(pycard)) {
       char* card_string = PyString_AsString(pycard);
+#endif
       if(!strcmp(card_string, "__")) {
 	card = 255;
       } else {
@@ -480,8 +507,8 @@ static int PyList2CardMask(PyObject* object, CardMask* cardsp)
 	  return -1;
 	}
       }
-    } else if(PyInt_Check(pycard)) {
-      card = PyInt_AsLong(pycard);
+    } else if(PyInteger_Check(pycard)) {
+      card = PyInteger_AsLong(pycard);
       if(card != NOCARD && (card < 0 || card > StdDeck_N_CARDS)) {
 	PyErr_Format(PyExc_TypeError, "card value (%d) must be in the range [0-%d]", card, StdDeck_N_CARDS);
 	return -1;
@@ -1083,11 +1110,44 @@ static PyMethodDef base_methods[] = {
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef IS_PY3K
+static int base_traverse(PyObject *m, visitproc visit, void *arg){
+	Py_VISIT(GETSTATE(m)->error);
+	return 0;
+}
+static int base_clear(PyObject *m){
+	Py_CLEAR(GETSTATE(m)->error);
+	return 0;
+}
+static struct PyModuleDef moduledef = {
+	PyModuleDef_HEAD_INIT,
+	"_pokereval_",
+	NULL,
+	sizeof(struct module_state),
+	base_methods,
+	NULL,
+	base_traverse,
+	base_clear,
+	NULL
+};
+PyObject * VERSION_NAME(PyInit__pokereval_)(void) {
+  PyObject * module = PyModule_Create( &moduledef);
+  if(module == NULL) return NULL;
+  struct module_state *st = GETSTATE(module);
+  st->error = PyErr_NewException("_pokereval_.Error", NULL, NULL);
+  if(st->error == NULL){
+	  Py_DECREF(module);
+	  return NULL;
+  }
+  return module;
+}
+#else
 DL_EXPORT(void)
 VERSION_NAME(init_pokereval_)(void)
 {
   Py_InitModule("_pokereval_" PYTHON_VERSION , base_methods);
 }
+#endif
 #ifdef __cplusplus
 }
 #endif

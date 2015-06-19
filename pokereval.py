@@ -28,7 +28,11 @@
 import sys
 _pokereval = __import__('_pokereval_' + sys.version[0] + '_' + sys.version[2])
 
-from types import *
+if sys.version_info[0] < 3:
+    from types import ListType, TupleType
+else:
+    ListType, TupleType = list, tuple
+    xrange = range
 
 class PokerEval:
     """\
@@ -155,7 +159,7 @@ o.winners(game = 'holdem', pockets = [ [ 'Ks', 'Kd'] ]).
         normalized_index = 0
         pockets = kwargs["pockets"][:]
         for index in xrange(len(pockets)):
-            if not kwargs.has_key("fill_pockets"):
+            if "fill_pockets" not in kwargs:
                 if 255 in pockets[index] or "__" in pockets[index]:
                     pockets[index] = []
 
@@ -170,7 +174,7 @@ o.winners(game = 'holdem', pockets = [ [ 'Ks', 'Kd'] ]).
         (count, haslopot, hashipot) = results.pop(0)
         winners = { 'low': [], 'hi': [] }
         for index in xrange(len(pockets)):
-            if index2index.has_key(index):
+            if index in index2index:
                 result = results[index2index[index]]
                 if result[1] == 1 or result[3] == 1:
                     winners["hi"].append(index)
@@ -297,7 +301,7 @@ The "cards" argument may be either a list in which case a converted list
 is returned or a string in which case the corresponding number is
 returned.
 """
-        if type(cards) is ListType or type(cards) is TupleType:
+        if isinstance(cards, ListType) or isinstance(cards, TupleType):
             return [ _pokereval.string2card(card) for card in cards ]
         else:
             return _pokereval.string2card(cards)
@@ -325,7 +329,7 @@ The "cards" argument may be either a list in which case a converted list
 is returned or an integer in which case the corresponding string is
 returned.
 """
-        if type(cards) is ListType or type(cards) is TupleType:
+        if isinstance(cards, ListType) or isinstance(cards, TupleType):
             return [ _pokereval.card2string(card) for card in cards ]
         else:
             return _pokereval.card2string(cards)

@@ -21,7 +21,8 @@ C_NAME = '_pokereval_' + PYTHON_VERSION
 
 core.setup(
     name = 'pokereval',
-    version = '1.38',
+    py_modules = ['pokereval'],
+    version = '1.39',
     description = '',
     author = '',
     author_email = '',
@@ -33,7 +34,7 @@ core.setup(
         Extension(
             C_NAME,
             ['pypokereval.c'],
-            include_dirs = ['include', '/usr/include/poker-eval'],
+            include_dirs = ['include', '/usr/local/include/poker-eval', '/usr/include/poker-eval'],
             libraries = ['poker-eval'],
             define_macros = [
                 ('PYTHON_VERSION', '"%s"' % PYTHON_VERSION),

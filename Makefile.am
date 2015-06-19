@@ -32,6 +32,14 @@ pythondir = ${pyexecdir}
 python_PYTHON = \
 	pokereval.py
 
+if PYTHON_2_7
+py2_6exec_LTLIBRARIES = _pokereval_2_7.la
+_pokereval_2_7_la_SOURCES = pypokereval.c
+_pokereval_2_7_la_LDFLAGS = -module -no-undefined -version-info 1:0:0
+_pokereval_2_7_la_LIBADD = ${PYTHON2_7_LIBS} ${POKER_EVAL_LIBS}
+_pokereval_2_7_la_CFLAGS = ${PYTHON2_7_CFLAGS} ${POKER_EVAL_CFLAGS} -DPYTHON_VERSION=\"2_7\" -D'VERSION_NAME(w)=w\#\#2_7'
+endif
+
 if PYTHON_2_6
 py2_6exec_LTLIBRARIES = _pokereval_2_6.la
 _pokereval_2_6_la_SOURCES = pypokereval.c
